@@ -4,8 +4,7 @@ import qdarkstyle
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QWidget, QTableWidget, QTableWidgetItem
 from PyQt5 import QtCore, QtGui, QtWidgets
-from f import Ui_MainWindow, UI_LoginWindow, Statistics
-from pie import pie
+from f import Ui_MainWindow, UI_LoginWindow
 import sqlite3 as db
 import pandas as pd
 from wallet import Wallet
@@ -23,28 +22,6 @@ ui_login = UI_LoginWindow()
 # ui_login.show()
 
 user = Wallet()
-'''''
-w2 = Wallet()
-w1.init_user(login ='1', password = '1234',name = 'Test')
-w1.init_wallet(value = 10000,name_wallet = 'test')
-w2.init_user(login='2',password='1234',name = 'f')
-w2.init_wallet(value=1000,name_wallet='u')
-
-w1.written_off(amount=120,category='Food')
-w1.written_off(amount=120,category='Food')
-
-w2.written_off(amount=190)
-w2.written_off(amount=190)
-
-#print(w1.get_wallet())
-
-w1.refill(value=1000)
-w1.refill(value=1000)
-
-#w1.sign_in(login = '1',password='1234')
-print(w1.view())
-print(w1.total_sum(category='Food'))
-'''''
 
 
 # hook logic
@@ -54,15 +31,24 @@ def ViewPng():
 
 def test():
     user.written_off(name_wallet=ui.Wallet_list.currentText(), amount=int(ui.lineEdit_2.text()),
-                     category=str(ui.lineEdit.text()))
+                     category=str(ui.lineEdit.text()), message=str(ui.lineEdit_comments.text()))
     ui.lineEdit_2.clear()
     ui.lineEdit.clear()
     entries = user.view()
     print(entries)
     ui.listwidget.setRowCount(len(entries))
     for i in range(len(entries)):
-        for j in range(1, 5):
-            ui.listwidget.setItem(i, j - 1, QTableWidgetItem(str(entries[i][j])))
+        f = 0
+        for j in range(2, 6):
+            ui.listwidget.setItem(i, f, QTableWidgetItem(str(entries[i][j])))
+            f+=1
+    ui.listwidget.resizeColumnsToContents()
+    wallet_list = user.get_wallet()
+    print(wallet_list)
+    ui.Tabel_view.setRowCount(len(wallet_list))
+    for i in range(len(wallet_list)):
+        for j in range(2):
+            ui.Tabel_view.setItem(i, j, QTableWidgetItem(str(wallet_list[i][j])))
     ui.listwidget.resizeColumnsToContents()
 
 
@@ -73,8 +59,8 @@ def show_it(the_password):
 ui.login.got.connect(show_it)
 
 
-def statistics(self):
-    ui.stat.initUI([user.login,user.password])
+def statistic(self):
+    ui.stat.initUI([user.login, user.password])
 
 
 def Login(data):
@@ -83,20 +69,30 @@ def Login(data):
     MainWindow.show()
     ui.login.close()
     entries = user.view()
-    print(entries)
     ui.listwidget.setRowCount(len(entries))
     for i in range(len(entries)):
-        for j in range(1, 5):
-            ui.listwidget.setItem(i, j - 1, QTableWidgetItem(str(entries[i][j])))
+        f = 0
+        for j in range(2, 6):
+
+            ui.listwidget.setItem(i, f, QTableWidgetItem(str(entries[i][j])))
+            f+=1
+    wallet_list = user.get_wallet()
+    print(wallet_list)
+    ui.Tabel_view.setRowCount(len(wallet_list))
+    for i in range(len(wallet_list)):
+        for j in range(2):
+            ui.Tabel_view.setItem(i, j, QTableWidgetItem(str(wallet_list[i][j])))
     ui.listwidget.resizeColumnsToContents()
     wallet_name()
 
 
 def wallet_name():
     ui.Wallet_list.clear()
+    ui.QComboBox_lst.clear()
     lst = user.view_wallet()
     for item in lst:
         ui.Wallet_list.addItem(str(item))
+        ui.QComboBox_lst.addItem(str(item))
 
 
 def Registration():
@@ -105,11 +101,28 @@ def Registration():
     ui_log.lineEdit_password.clear()
 
 
+def refill():
+    user.refill(value=int(ui.lineEdit_Sum.text()), name_wallet=str(ui.QComboBox_lst.currentText()))
+    ui.lineEdit_Sum.clear()
+    wallet_list = user.get_wallet()
+    ui.Tabel_view.setRowCount(len(wallet_list))
+    for i in range(len(wallet_list)):
+        for j in range(2):
+            ui.Tabel_view.setItem(i, j, QTableWidgetItem(str(wallet_list[i][j])))
+
+
 def AddWalet():
     user.init_wallet(value=int(ui.lineEdit_Value.text()), name_wallet=str(ui.lineEdit_name.text()))
     ui.lineEdit_Value.clear()
     ui.lineEdit_name.clear()
+    wallet_list = user.get_wallet()
+    ui.Tabel_view.setRowCount(len(wallet_list))
+    for i in range(len(wallet_list)):
+        for j in range(2):
+            ui.Tabel_view.setItem(i, j, QTableWidgetItem(str(wallet_list[i][j])))
     wallet_name()
+
+
 def Exit():
     MainWindow.close()
     ui.login.show()
@@ -129,8 +142,8 @@ ui_log.pushButton_Login.clicked.connect(Login)
 ui.pushButton_AddWallet.clicked.connect(AddWalet)
 ui.pushButton_Exit.clicked.connect(Exit)
 ui_log.pushButton_Sign_up.clicked.connect(Registration)
-ui.pushButton_1.clicked.connect(statistics)
-# print(w1.get_wallet(login='1',password='1234'))
+ui.pushButton_1.clicked.connect(statistic)
+ui.pushButton_refill.clicked.connect(refill)
 
 # main loop
 sys.exit(app.exec_())
