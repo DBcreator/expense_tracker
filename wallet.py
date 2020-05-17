@@ -58,7 +58,11 @@ class Wallet(User):
         self.cursor.execute(sql_query2)
 
         res = self.cursor.fetchall()
-        return res
+        sum_and_names = []
+        for i in range(len(res)):
+            sum_and_names.append([res[i][3],res[i][2]])
+
+        return sum_and_names
 
     def written_off(self, name_wallet, amount, category = None, message=None,date = None):
         '''
@@ -70,7 +74,7 @@ class Wallet(User):
         '''
         from datetime import datetime
         if date == None:
-            date = str(datetime.now())  # сохраняем сегодняшнюю дату
+            date = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # сохраняем сегодняшнюю дату
 
         self.conn = db.connect('transaction.db')
         self.cursor = self.conn.cursor()
@@ -91,16 +95,20 @@ class Wallet(User):
         name = res[3]
 
         new_wallet = wallet - amount
+        if new_wallet >= 0:
+            new_data = (wallet_id,id, new_wallet,name)
 
-        new_data = (wallet_id,id, new_wallet,name)
-
-        sql_query3 = '''
+            sql_query3 = '''
                     replace into wallets(wallet_id,user_id,value,name_wallet) values (?, ?, ?, ?)
                     '''
-        self.cursor.execute(sql_query3,new_data)
+            self.cursor.execute(sql_query3,new_data)
 
-        # сохраняем изменения
-        self.conn.commit()
+            # сохраняем изменения
+            self.conn.commit()
+            return True
+        else:
+            print('Недостаточно денег на счету')
+            return False
 
     def refill(self,value,name_wallet):
         '''
